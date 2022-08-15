@@ -3,7 +3,48 @@ const express = require("express");
 const app = express();
 const fs = require("fs");
 const multer = require("multer");
-const { createWorker, createScheduler } = require('tesseract.js');
+const { createWorker } = require('tesseract.js');
+const worker = createWorker();
+//define bouding boxes
+const rectangles = [
+    {
+        //character name
+        top: 155, 
+        left: 20, 
+        width: 400, 
+        height: 65
+    },
+    {
+        //setname1
+        top: 774, 
+        left: 83, 
+        width: 165, 
+        height: 24
+    },
+    {
+        //setname2
+        top: 804, 
+        left: 83, 
+        width: 165, 
+        height: 24 
+    },
+    {
+        //setname3
+        top: 832, 
+        left: 80, 
+        width: 200, 
+        height: 40 
+    },
+    {
+    //stats
+    top: 470, 
+    left: 225, 
+    width: 90, 
+    height: 100 
+    }
+];
+
+// Call Tesseract as early as possible
 
 //declared our storage
 const storage = multer.diskStorage({
@@ -20,57 +61,33 @@ const upload = multer({ storage: storage }).single("avatar");
 app.set("view engine", "ejs");
 //Declared our routes
 app.get('/', (req, res) => {
-    console.log("Pitcure selected");
     res.render('index');
 });
 
 app.post("/upload", (req,res) => {
-    console.log("Ready to upload picture");
     upload(req,res, err => {
             fs.readFile(`./uploads/${req.file.originalname}`,(err, data) => {
-                (async () => {
-                    const scheduler = createScheduler();
-                    const worker1 = createWorker();
-                    const worker2 = createWorker();
-                    const rectangles = [
-                        {
-                            top: 470, 
-                            left: 225, 
-                            width: 90, 
-                            height: 100 
-                        },
-                        {
-                            top: 765, 
-                            left: 80, 
-                            width: 200, 
-                            height: 265 
-                        },
-                      ];
-                      await worker1.load();
-                      await worker2.load();
-                      await worker1.loadLanguage('eng');
-                      await worker2.loadLanguage('eng');
-                      await worker1.initialize('eng');
-                      await worker2.initialize('eng');
-                      await worker1.setParameters({
-                        tessedit_char_whitelist: '0123456789qwertyuiopasdfghjklzxcvbnm.%',
-                      });
-                      await worker2.setParameters({
-                        tessedit_char_whitelist: '0123456789qwertyuiopasdfghjklzxcvbnm.%',
-                      });
-                      scheduler.addWorker(worker1);
-                      scheduler.addWorker(worker2);
-                      const results = await Promise.all(rectangles.map((rectangle) => (
-                        scheduler.addJob('recognize', `./uploads/${req.file.originalname}`, { rectangle })
-                      )));
-                      console.log(results.map(r => r.data.text));
-                      await scheduler.terminate();
-                    console.log('Tesseract terminated');
+                console.log("Picture uploaded"); 
+                (async ()=> {
+                    await worker.load();
+                    await worker.loadLanguage('eng');
+                    await worker.initialize('eng');
+                    await worker.setParameters({
+                         tessedit_char_whitelist: 'qwertyuiopasdfghjklzxcvbnm'+ ' ' + 'QWERTYUIOPASDFGHJKLZXCVBNM' + '123456789.%',
+                         tessedit_char_blacklist: "é\/"
+                    });
+                    const values = [];
+                    console.log("Reading rectangles")
+                    for (let i = 0; i < rectangles.length; i++) {
+                        const { data: { text } } = await worker.recognize(`./uploads/${req.file.originalname}`, { rectangle: rectangles[i] });
+                        console.log(rectangles[i])
+                        values.push(text);
+                        console.log(values);
+                    }
                   })();
-        });
+                });
+            });
     });
-});
-
 
 //start up our server
 const PORT = 5000 || process.env.PORT;
