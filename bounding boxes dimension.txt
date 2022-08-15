@@ -1,0 +1,11 @@
+sets bounding boxes:
+top: 765, 
+left: 80, 
+width: 200, 
+height: 265 
+
+stats bounding boxes:
+top: 470, 
+left: 225, 
+width: 90, 
+height: 100 
