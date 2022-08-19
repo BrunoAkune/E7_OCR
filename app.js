@@ -27,17 +27,17 @@ const rectangles = [
     top: 832,left: 80,width: 200,height: 26},
     {
     //5 - attack
-    top: 475,left: 230,width: 90,height: 24}, 
+    top: 475,left: 230,width: 90,height: 24},
     {
     //6 - def
-    top: 500,left: 230,width: 90,height: 24}, 
+    top: 500,left: 230,width: 90,height: 24},
     {
     //7 - HP
-    top: 530,left: 230,width: 90,height: 24}, 
+    top: 530,left: 230,width: 90,height: 24},
     {
     //8 - Speed
     top: 560,left: 230,width: 90,height: 24},
-    {   
+    {
     //9 - Crit C
     top: 590,left: 230,width: 90,height: 24},
     {
@@ -49,7 +49,7 @@ const rectangles = [
     {
     //12 - Eff Res
     top: 680,left: 230,width: 90,height: 24},
-    {     
+    {
     //13 - Dual Att
     top: 710,left: 230,width: 90,height: 24},
 ];
@@ -60,7 +60,7 @@ const rectangles = [
 const storage = multer.diskStorage({
     destination: (req,file,cb) => {
         cb(null, "./uploads");
-    },   
+    },
     filename: (req,file,cb) =>{
     cb(null, file.originalname);
     }
@@ -81,12 +81,12 @@ const database = async (values) => {
     var dictionary = [];
 
     //Opening and loading the file
-    console.log("Opened the file:" + doc.spreadsheetId);  
+    console.log("Opened the file:" + doc.spreadsheetId);
     console.log(values + "received");
     await doc.useServiceAccountAuth(creds); //Use the credential in the same folder
     await doc.loadInfo();
     const worksheet = doc.sheetsByIndex[0]; // Here, 1st tab on Google Spreadsheet is used.
-    
+
     await worksheet.setHeaderRow(["These are all the characters in this sheet:"]);
     console.log("Header set");
     dictionary = [row[0]]; //Creating a new array using only the names uploaded.
@@ -110,7 +110,7 @@ const database = async (values) => {
 app.post("/upload", (req,res) => {
     upload(req,res, err => {
             fs.readFile(`./uploads/${req.file.originalname}`,(err, data) => {
-                console.log("Picture uploaded"); 
+                console.log("Picture uploaded");
                 (async ()=> {
                     await worker.load();
                     const values = [];
@@ -125,7 +125,7 @@ app.post("/upload", (req,res) => {
                             tessedit_char_whitelist: 'qwertyuiopasdfghjklzxcvbnm'+ ' ' + 'QWERTYUIOPASDFGHJKLZXCVBNM',
                             tessedit_char_blacklist: "é\/!" ,
                             //tessedit_pageseg_mode:  PSM.RAW_LINE
-                    }); 
+                    });
                         } else {
                             //Only read number for the stats.
                             await worker.load();
@@ -140,9 +140,9 @@ app.post("/upload", (req,res) => {
                          const { data: { text } } = await worker.recognize(`./uploads/${req.file.originalname}`, { rectangle: rectangles[i] });
                          console.log(rectangles[i])
                          values.push(text);
-                         console.log(values[i]);     
-                     } 
-                    console.log(values);                   
+                         console.log(values[i]);
+                     }
+                    console.log(values);
                     res.send(values); //send the results to the screem
                     database(values); //send the results to Google Sheets
                    })();
