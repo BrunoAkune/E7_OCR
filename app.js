@@ -77,8 +77,7 @@ app.get('/', (req, res) => {
 //Sending OCR data to Google Sheets
 const database = async (values) => {
     //all the variabales used
-    const row = Array.from(values); //reciclying the array used in the OCR to add to the columns
-    var dictionary = [];
+    const stats = Array.from(values); //reciclying the array used in the OCR to add to the columns
 
     //Opening and loading the file
     console.log("Opened the file:" + doc.spreadsheetId);
@@ -87,23 +86,45 @@ const database = async (values) => {
     await doc.loadInfo();
     const worksheet = doc.sheetsByIndex[0]; // Here, 1st tab on Google Spreadsheet is used.
 
-    await worksheet.setHeaderRow(["These are all the characters in this sheet:"]);
+    await worksheet.setHeaderRow(["Character"]);
     console.log("Header set");
-    dictionary = [row[0]]; //Creating a new array using only the names uploaded.
-    await worksheet.addRow(dictionary);
-    const dictionaryLength = dictionary.push();
-    console.log(dictionaryLength);
-    // adding sheets
-    const newSheet = await doc.addSheet({ title: values[0] });
 
-    //Adding the Stats
-    await newSheet.setHeaderRow(["Name", "Set 1", "Set 2", "Set 3", "Attack",
-    "Defense", "Health", "Speed", "Critical Hit Chance", "Critical Hit Damage", "Effectiveness",
-    "Effect Resistance", "Dual Attack"]); // This is the header row.
-    console.log("Headers set");
-    console.log("Adding Row");
-    await newSheet.addRow(row); // This is the row content
-    console.log("Row added");
+    var rows = await worksheet.getRows()
+
+    var charName = stats[0]
+
+    var alreadyAdded = false
+
+    for (var i = 0; i < rows.length; i++) {
+        if (charName === rows[i].Character) {
+            alreadyAdded = true
+            break
+        }
+    }
+
+    var characterSheet = null
+
+    if (!alreadyAdded) {
+        console.log("Adding " + charName + " to the Character list");
+        worksheet.addRow([charName]);
+
+        // Adding a new worksheet
+        characterSheet = await doc.addSheet({ title: charName });
+
+        console.log("Adding new sheet for " + charName);
+        await characterSheet.setHeaderRow(["Name", "Set 1", "Set 2", "Set 3", "Attack",
+                                           "Defense", "Health", "Speed", "Critical Hit Chance",
+                                           "Critical Hit Damage", "Effectiveness",
+                                           "Effect Resistance", "Dual Attack"]);
+    } else {
+        console.log("Character already added (" + charName + ")");
+
+        console.log("Getting current sheet for " + charName);
+        characterSheet = await doc.sheetsByTitle[charName]
+    }
+
+    console.log("Adding new data for " + charName);
+    characterSheet.addRow(stats);
 };
 
 //Scanning the image and getting the name, stats and sets of the character uploaded
