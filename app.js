@@ -106,16 +106,22 @@ const database = async (values) => {
 
     if (!alreadyAdded) {
         console.log("Adding " + charName + " to the Character list");
-        worksheet.addRow([charName]);
+        try {
+            worksheet.addRow([charName]);
 
-        // Adding a new worksheet
-        characterSheet = await doc.addSheet({ title: charName });
+            // Adding a new worksheet
+            characterSheet = await doc.addSheet({ title: charName });
 
-        console.log("Adding new sheet for " + charName);
-        await characterSheet.setHeaderRow(["Name", "Set 1", "Set 2", "Set 3", "Attack",
-                                           "Defense", "Health", "Speed", "Critical Hit Chance",
-                                           "Critical Hit Damage", "Effectiveness",
-                                           "Effect Resistance", "Dual Attack"]);
+            console.log("Adding new sheet for " + charName);
+            await characterSheet.setHeaderRow(["Name", "Set 1", "Set 2", "Set 3", "Attack",
+                                               "Defense", "Health", "Speed", "Critical Hit Chance",
+                                               "Critical Hit Damage", "Effectiveness",
+                                               "Effect Resistance", "Dual Attack"]);
+        } catch (err) {
+            console.log("Error creating new sheet: " + err.message);
+            console.log("Sheet probably already existed, trying to use an existing one");
+            characterSheet = await doc.sheetsByTitle[charName]
+        }
     } else {
         console.log("Character already added (" + charName + ")");
 
