@@ -160,7 +160,7 @@ app.post("/upload", (req,res) => {
                         }
                          const { data: { text } } = await worker.recognize(`./uploads/${req.file.originalname}`, { rectangle: rectangles[i] });
                          console.log(rectangles[i])
-                         values.push(text);
+                         values.push(text.replace(/(\r\n|\n|\r)/gm, ""));
                          console.log(values[i]);
                      }
                     console.log(values);
