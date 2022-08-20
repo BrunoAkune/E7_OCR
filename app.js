@@ -13,7 +13,6 @@ const doc = new GoogleSpreadsheet('1AL6dgmFY2UVe5av0oyPyA_z4iPxxk79m0HtM_hZqWbE'
 
 //define bouding boxes
 const rectangles = [
-
     {
     //1 - character name
     top: 155,left: 40,width: 360,height: 62},
