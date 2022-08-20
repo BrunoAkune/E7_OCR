@@ -13,7 +13,7 @@ const doc = new GoogleSpreadsheet('1AL6dgmFY2UVe5av0oyPyA_z4iPxxk79m0HtM_hZqWbE'
 
 //define bouding boxes
 const rectangles = [
-    
+
     {
     //1 - character name
     top: 155,left: 40,width: 360,height: 62},
@@ -132,6 +132,7 @@ const database = async (values) => {
 
     console.log("Adding new data for " + charName);
     characterSheet.addRow(stats);
+    console.log("Finish");
 };
 
 //Scanning the image and getting the name, stats and sets of the character uploaded
@@ -172,6 +173,7 @@ app.post("/upload", (req,res) => {
                      }
                     console.log(values);
                     res.send(values); //send the results to the screem
+                    await worker.terminate(); 
                     database(values); //send the results to Google Sheets
                    })();
                 });
