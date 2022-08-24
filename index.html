@@ -4,21 +4,19 @@
         <meta charset = "UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <meta http-equiv="X-UA-Compatible" content="ie=edge">
-        <link rel="stylesheet" href = "/public/style.css">
+        <link rel="stylesheet" href="styles.css">        
         <title>Epic7 OCR</title>
     </head>
     <body>
         <img src="img/epic-seven.png" class="center">
+        
         <input type="text" id="myInput" onkeyup="myFunction()" placeholder="Search for names.." title="Type in a name">
 
-        <table id="myTable">
-            <tr class="header">
-              <th style="width:60%;">Name</th>
-              <th style="width:40%;">Country</th>
-            </tr>
-            <thead id="table-head"></thead>
-            <tbody id="table-body"></tbody>
-          </table>
+        <div id = "tbl">
+        <table>
+            <caption>Arbiter Vildred Latest 50 builds</caption>
+        </table>
+        </div>
 
         <h1>Select IMG</h1>
         <form action="/upload" method="POST" enctype="multipart/form-data">
@@ -31,47 +29,45 @@
         </footer>
 
         <script>
-        {
-            {
-                // Your API KEY
-                const API_KEY =  require('./google-sheets-key.json'); // Credentials for the Google Sheets
+        const start = () => {
+            gapi.client.init({
+            'apiKey': 'AIzaSyCcLovQqozJ8tDguAigBE9PvpD4AAfEi0w',
+            'discoveryDocs': ["https://sheets.googleapis.com/$discovery/rest?version=v4"],
+            }) .then(() => {
+            return gapi.client.sheets.spreadsheets.values.get({
+            spreadsheetId: '1AL6dgmFY2UVe5av0oyPyA_z4iPxxk79m0HtM_hZqWbE',
+            range: 'Arbiter Vildred!A1:M20', // for example: List 1!A1:B6
+            })
+        })
 
-                function displayResult2(response) {
-                let tableHead = "";
-                let tableBody = "";
+        .then((response) => {
+            // parse the response data
+            const loadedData = response.result.values;
 
-                response.result.values.forEach((row, index) => {
-                    if (index === 0) {
-                    tableHead += "<tr>";
-                    row.forEach((val) => (tableHead += "<th>" + val + "</th>"));
-                    tableHead += "</tr>";
-                    } else {
-                    tableBody += "<tr>";
-                    row.forEach((val) => (tableBody += "<td>" + val + "</td>"));
-                    tableBody += "</tr>";
-                    }
-                });
+            // populate the HTML table with the data
+            const table = document.getElementsByTagName('table')[0];
+            
+            // add column headers
+            const columnHeaders = document.createElement('tr');
+            columnHeaders.innerHTML = `<th>${loadedData[0][0]}</th>
+        <th>${loadedData[0][1]}</th>`;
+            table.appendChild(columnHeaders);
 
-                document.getElementById("table-head").innerHTML = tableHead;
-                document.getElementById("table-body").innerHTML = tableBody;
-                }
-
-                function loadData() {
-                // Spreadsheet ID
-                const spreadsheetId = "1AL6dgmFY2UVe5av0oyPyA_z4iPxxk79m0HtM_hZqWbE";
-                const range = "A:M";
-                getPublicValues({ spreadsheetId, range }, displayResult2);
-                }
-
-                window.addEventListener("load", (e) => {
-                initOAuthClient({ apiKey: API_KEY });
-                });
-
-                document.addEventListener("gapi-loaded", (e) => {
-                loadData();
-                });
+            // add table data rows
+            for (let i = 1; i < loadedData.length; i++) {
+            const tableRow = document.createElement('tr');
+            tableRow.innerHTML = `<td>${loadedData[i][0]}</td>
+        <td>${loadedData[i][1]}</td>`;
+            table.appendChild(tableRow);
             }
-        }
+        }).catch((err) => {
+            console.log(err.error.message);
+        });
+
+        gapi.load('client', start);
+        };
+
+        ///function to allow the table to have a search bar
         function myFunction() {
         var input, filter, table, tr, td, i, txtValue;
         input = document.getElementById("myInput");
