@@ -5,6 +5,8 @@ const fs = require("fs");
 const multer = require("multer");
 const { createWorker, PSM  } = require('tesseract.js');
 const worker = createWorker();
+const sharp = require('sharp'); //resize images to improve accuracy
+
 
 //declared API Google Sheets
 const { GoogleSpreadsheet } = require('google-spreadsheet');
@@ -15,7 +17,8 @@ const doc = new GoogleSpreadsheet('1AL6dgmFY2UVe5av0oyPyA_z4iPxxk79m0HtM_hZqWbE'
 const rectangles = [
     {
     //1 - character name
-    top: 155,left: 40,width: 360,height: 62},
+    //top: 155,left: 40,width: 360,height: 62},
+    top: 27,left: 83,width: 500,height: 60},
     {
     //2 - setname1
     top: 774,left: 83,width: 165,height: 26},
@@ -56,7 +59,7 @@ const rectangles = [
 
 // Call Tesseract as early as possible
 
-//declared our storage
+//declared our storage/middleware(as called in multer documentation)
 const storage = multer.diskStorage({
     destination: (req,file,cb) => {
         cb(null, "./uploads");
@@ -65,14 +68,67 @@ const storage = multer.diskStorage({
     cb(null, file.originalname);
     }
 });
+const upload = multer({ storage: storage }).single('avatar');
 
-const upload = multer({ storage: storage }).single("avatar");
 
 app.set("view engine", "ejs");
+app.use(express.static("public"));
+
 //Declared our routes
 app.get('/', (req, res) => {
-    res.render('index');
+    res.render('analyze');
 });
+
+//Scanning the image and getting the name, stats and sets of the character uploaded
+app.post("/upload", (req,res) => {
+    upload(req,res, err => {
+        console.log(req.file);
+            fs.readFile(`./uploads/${req.file.originalname}`,(err, data) => {
+                console.log("Picture uploaded");
+                    (async ()=> {
+                        await worker.load();
+                        const values = [];
+                        console.log("Reading rectangles")
+                        for (let i = 0; i < rectangles.length; i++) {
+                            //Only read letters until it finishes reading the name + sets
+                            if (i<4){
+                                console.log(values);
+                                await worker.load();
+                                await worker.loadLanguage('eng');
+                                await worker.initialize('eng');
+                                await worker.setParameters({
+                                    tessedit_char_whitelist: 'qwertyuiopasdfghjklzxcvbnm'+ ' ' + 'QWERTYUIOPASDFGHJKLZXCVBNM',
+                                    tessedit_char_blacklist: "é\/!" ,
+                                    //tessedit_pageseg_mode:  PSM.RAW_LINE
+                                    })
+                                } else {
+                                    //Only read number for the stats.
+                                    await worker.load();
+                                    await worker.loadLanguage('eng');
+                                    await worker.initialize('eng');
+                                    await worker.setParameters({
+                                    tessedit_char_whitelist: '0123456789.%',
+                                    tessedit_char_blacklist: "é\/?!" ,
+                                    //tessedit_pageseg_mode: PSM.SINGLE_LINE
+                                    });
+                                }
+                                const { data: { text } } = await worker.recognize(`./uploads/${req.file.originalname}`, { rectangle: rectangles[i] });
+                                console.log(rectangles[i])
+                                values.push(text.replace(/(\r\n|\n|\r)/gm, ""));
+                                console.log(values[i]);
+                            }
+                            console.log(values);
+                            res.send(values); //send the results to the screem
+                            await worker.terminate(); 
+                            console.log("Worker terminated");
+                            database(values); //send the results to Google Sheets
+                        })();
+                    
+                });
+
+            });
+
+    });
 
 //Sending OCR data to Google Sheets
 const database = async (values) => {
@@ -134,52 +190,6 @@ const database = async (values) => {
     console.log("Finish");
 };
 
-//Scanning the image and getting the name, stats and sets of the character uploaded
-app.post("/upload", (req,res) => {
-    upload(req,res, err => {
-            fs.readFile(`./uploads/${req.file.originalname}`,(err, data) => {
-                console.log("Picture uploaded");
-                (async ()=> {
-                    await worker.load();
-                    const values = [];
-                    console.log("Reading rectangles")
-                    for (let i = 0; i < rectangles.length; i++) {
-                        //Only read letters until it finishes reading the name + sets
-                        if (i<4){
-                            await worker.load();
-                            await worker.loadLanguage('eng');
-                            await worker.initialize('eng');
-                            await worker.setParameters({
-                            tessedit_char_whitelist: 'qwertyuiopasdfghjklzxcvbnm'+ ' ' + 'QWERTYUIOPASDFGHJKLZXCVBNM',
-                            tessedit_char_blacklist: "é\/!" ,
-                            //tessedit_pageseg_mode:  PSM.RAW_LINE
-                    });
-                        } else {
-                            //Only read number for the stats.
-                            await worker.load();
-                            await worker.loadLanguage('eng');
-                            await worker.initialize('eng');
-                            await worker.setParameters({
-                            tessedit_char_whitelist: '0123456789.%',
-                            tessedit_char_blacklist: "é\/?!" ,
-                            //tessedit_pageseg_mode: PSM.SINGLE_LINE
-                        });
-                        }
-                         const { data: { text } } = await worker.recognize(`./uploads/${req.file.originalname}`, { rectangle: rectangles[i] });
-                         console.log(rectangles[i])
-                         values.push(text.replace(/(\r\n|\n|\r)/gm, ""));
-                         console.log(values[i]);
-                     }
-                    console.log(values);
-                    res.send(values); //send the results to the screem
-                    await worker.terminate(); 
-                    database(values); //send the results to Google Sheets
-                   })();
-                });
-
-            });
-
-    });
 
 //start up our server
 const PORT = 5000 || process.env.PORT;

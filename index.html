@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html Lang="eng">
+    <head>
+        <meta charset = "UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta http-equiv="X-UA-Compatible" content="ie=edge">
+        <link rel="stylesheet" href = "/public/style.css">
+        <title>Epic7 OCR</title>
+    </head>
+    <body>
+        <img src="img/epic-seven.png" class="center">
+        <input type="text" id="myInput" onkeyup="myFunction()" placeholder="Search for names.." title="Type in a name">
+
+        <table id="myTable">
+            <tr class="header">
+              <th style="width:60%;">Name</th>
+              <th style="width:40%;">Country</th>
+            </tr>
+            <thead id="table-head"></thead>
+            <tbody id="table-body"></tbody>
+          </table>
+
+        <h1>Select IMG</h1>
+        <form action="/upload" method="POST" enctype="multipart/form-data">
+            <input type="file" name="avatar"  multiple  />
+            <button type="submit">Upload</button>
+        </form>
+        <footer>
+            <h4> Built by <a href="" style="text-decoration: none"> Bruno Akune </a>
+            <h4> Powered by <a href="https://www.apispreadsheets.com" style="text-decoration: none"> API Spreadsheets </a> </h4>
+        </footer>
+
+        <script>
+        {
+            {
+                // Your API KEY
+                const API_KEY =  require('./google-sheets-key.json'); // Credentials for the Google Sheets
+
+                function displayResult2(response) {
+                let tableHead = "";
+                let tableBody = "";
+
+                response.result.values.forEach((row, index) => {
+                    if (index === 0) {
+                    tableHead += "<tr>";
+                    row.forEach((val) => (tableHead += "<th>" + val + "</th>"));
+                    tableHead += "</tr>";
+                    } else {
+                    tableBody += "<tr>";
+                    row.forEach((val) => (tableBody += "<td>" + val + "</td>"));
+                    tableBody += "</tr>";
+                    }
+                });
+
+                document.getElementById("table-head").innerHTML = tableHead;
+                document.getElementById("table-body").innerHTML = tableBody;
+                }
+
+                function loadData() {
+                // Spreadsheet ID
+                const spreadsheetId = "1AL6dgmFY2UVe5av0oyPyA_z4iPxxk79m0HtM_hZqWbE";
+                const range = "A:M";
+                getPublicValues({ spreadsheetId, range }, displayResult2);
+                }
+
+                window.addEventListener("load", (e) => {
+                initOAuthClient({ apiKey: API_KEY });
+                });
+
+                document.addEventListener("gapi-loaded", (e) => {
+                loadData();
+                });
+            }
+        }
+        function myFunction() {
+        var input, filter, table, tr, td, i, txtValue;
+        input = document.getElementById("myInput");
+        filter = input.value.toUpperCase();
+        table = document.getElementById("myTable");
+        tr = table.getElementsByTagName("tr");
+        for (i = 0; i < tr.length; i++) {
+            td = tr[i].getElementsByTagName("td")[0];
+            if (td) {
+            txtValue = td.textContent || td.innerText;
+            if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                tr[i].style.display = "";
+            } else {
+                tr[i].style.display = "none";
+            }
+            }       
+        }
+        }
+</script>
+    </body>
+</html>
