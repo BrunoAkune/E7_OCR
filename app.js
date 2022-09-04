@@ -68,7 +68,7 @@ const storage = multer.diskStorage({
     cb(null, file.originalname);
     }
 });
-const upload = multer({ storage: storage }).single('avatar');
+const upload = multer({ storage: storage }).array('avatar');
 
 
 app.set("view engine", "ejs");
@@ -82,53 +82,112 @@ app.get('/', (req, res) => {
 //Scanning the image and getting the name, stats and sets of the character uploaded
 app.post("/upload", (req,res) => {
     upload(req,res, err => {
-        console.log(req.file);
-            fs.readFile(`./uploads/${req.file.originalname}`,(err, data) => {
-                console.log("Picture uploaded");
-                    (async ()=> {
-                        await worker.load();
-                        const values = [];
-                        console.log("Reading rectangles")
-                        for (let i = 0; i < rectangles.length; i++) {
-                            //Only read letters until it finishes reading the name + sets
-                            if (i<4){
-                                console.log(values);
-                                await worker.load();
-                                await worker.loadLanguage('eng');
-                                await worker.initialize('eng');
-                                await worker.setParameters({
-                                    tessedit_char_whitelist: 'qwertyuiopasdfghjklzxcvbnm'+ ' ' + 'QWERTYUIOPASDFGHJKLZXCVBNM',
-                                    tessedit_char_blacklist: "é\/!" ,
-                                    //tessedit_pageseg_mode:  PSM.RAW_LINE
-                                    })
-                                } else {
-                                    //Only read number for the stats.
-                                    await worker.load();
-                                    await worker.loadLanguage('eng');
-                                    await worker.initialize('eng');
-                                    await worker.setParameters({
-                                    tessedit_char_whitelist: '0123456789.%',
-                                    tessedit_char_blacklist: "é\/?!" ,
-                                    //tessedit_pageseg_mode: PSM.SINGLE_LINE
-                                    });
-                                }
-                                const { data: { text } } = await worker.recognize(`./uploads/${req.file.originalname}`, { rectangle: rectangles[i] });
-                                console.log(rectangles[i])
-                                values.push(text.replace(/(\r\n|\n|\r)/gm, ""));
-                                console.log(values[i]);
-                            }
-                            console.log(values);
-                            res.send(values); //send the results to the screem
-                            await worker.terminate(); 
-                            console.log("Worker terminated");
-                            database(values); //send the results to Google Sheets
-                        })();
-                    
-                });
-
-            });
-
+            //for(let x = 0; x < req.files.length; x++){
+            req.files.reduce(async (memo, x) => 
+                { 
+                    await memo;
+                    console.log("filename" + x.originalname); 
+                    await processImg(req, res, x.originalname);
+                    console.log("After async");
+                }
+                , undefined
+            );
+                //
+                    //await fs.readFile(`./uploads/${req.files[x].originalname}`,(err, data) => 
+                        //{
+                        //console.log("Picture uploaded:"+ req.files[x].originalname);
+                            // (async ()=> {
+                            //     await processImg(req, res, req.files[x].originalname);
+                            //     console.log("After processing image");
+                            //             })();
+                        // (async ()=> {
+                        //     await worker.load();
+                        //     const values = [];
+                        //     console.log("Reading rectangles")
+                        //     for (let i = 0; i < rectangles.length; i++) {
+                        //         //Only read letters until it finishes reading the name + sets
+                        //         if (i<4){
+                        //             console.log(values);
+                        //             await worker.load();
+                        //             await worker.loadLanguage('eng');
+                        //             await worker.initialize('eng');
+                        //             await worker.setParameters({
+                        //                 tessedit_char_whitelist: 'qwertyuiopasdfghjklzxcvbnm'+ ' ' + 'QWERTYUIOPASDFGHJKLZXCVBNM',
+                        //                 tessedit_char_blacklist: "é\/!" ,
+                        //                 //tessedit_pageseg_mode:  PSM.RAW_LINE
+                        //                 })
+                        //             } else {
+                        //                 //Only read number for the stats.
+                        //                 await worker.load();
+                        //                 await worker.loadLanguage('eng');
+                        //                 await worker.initialize('eng');
+                        //                 await worker.setParameters({
+                        //                 tessedit_char_whitelist: '0123456789.%',
+                        //                 tessedit_char_blacklist: "é\/?!" ,
+                        //                 //tessedit_pageseg_mode: PSM.SINGLE_LINE
+                        //                 });
+                        //             }
+                        //             const { data: { text } } = await worker.recognize(`./uploads/${req.files[x].originalname}`, { rectangle: rectangles[i] });
+                        //             console.log(rectangles[i])
+                        //             values.push(text.replace(/(\r\n|\n|\r)/gm, ""));
+                        //             console.log(values[i]);
+                        //         }
+                        //         console.log(values);
+                        //         res.send(values); //send the results to the screem
+                        //         await worker.terminate(); 
+                        //         console.log("Worker terminated");
+                        //         database(values); //send the results to Google Sheets
+                                
+                        //     })();
+                            
+                
+                        //
+                }
+            );
     });
+
+
+async function processImg (req, res, filename) {
+    await worker.load();
+    const values = [];
+    console.log("Reading rectangles for " + filename);
+    for (let i = 0; i < rectangles.length; i++) {
+        //Only read letters until it finishes reading the name + sets
+        if (i<4){
+            //console.log(values);
+            await worker.load();
+            await worker.loadLanguage('eng');
+            await worker.initialize('eng');
+            await worker.setParameters({
+                tessedit_char_whitelist: 'qwertyuiopasdfghjklzxcvbnm'+ ' ' + 'QWERTYUIOPASDFGHJKLZXCVBNM',
+                tessedit_char_blacklist: "é\/!" ,
+                //tessedit_pageseg_mode:  PSM.RAW_LINE
+                })
+            } else {
+                //Only read number for the stats.
+                await worker.load();
+                await worker.loadLanguage('eng');
+                await worker.initialize('eng');
+                await worker.setParameters({
+                tessedit_char_whitelist: '0123456789.%',
+                tessedit_char_blacklist: "é\/?!" ,
+                //tessedit_pageseg_mode: PSM.SINGLE_LINE
+                });
+            }
+            const { data: { text } } = await worker.recognize(`./uploads/${filename}`, { rectangle: rectangles[i] });
+            //console.log(rectangles[i])
+            values.push(text.replace(/(\r\n|\n|\r)/gm, ""));
+            //console.log(values[i]);
+        }
+
+        console.log(values);
+        //res.send(values); //send the results to the screem
+        //await worker.terminate(); 
+        //console.log("Worker terminated");
+        await database(values); //send the results to Google Sheets  
+        console.log("processed images terminated");         
+}
+
 
 //Sending OCR data to Google Sheets
 const database = async (values) => {

@@ -1,0 +1,259 @@
+* {
+    padding: 0; 
+    box-sizing: border-box;  
+}
+
+html, body {
+  background-color: rgb(255, 255, 255);
+  line-height: 1.6em;
+  font-family: 'Roboto', sans-serif;
+  text-align: center;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+}
+
+header {
+  display: grid;
+  width: 100%;
+  background-size: cover;
+  align-items:end;
+}
+
+header img {
+  height: 35vh;
+  margin: auto;
+  /* border: 1px black solid; */
+}
+
+.topBar{
+  margin: 10px;
+  padding: 20px;
+  background: #fff;
+  height: 20px;
+}
+
+.topBar img{
+  float: left;
+  max-width: 50px;
+}
+
+.navigation {
+  float: right;
+}
+
+#siteNav ul {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+}
+
+#siteNav ul li{
+  display: inline-block;
+}
+
+#siteNav ul li a{
+  padding: 10px 20px;
+  color: #000;
+  text-transform: uppercase;
+  font-size: 14px;
+  text-align: center;
+  text-decoration: none;
+  transition: all 0.5s;
+}
+
+#siteNav ul li a:hover {
+  background: #333;
+  color: #fff;
+}
+
+.current {
+  border: 1px #000 solid;
+}
+
+.lowerText {
+  /* border: 1px black solid; */
+  margin: 10px 10px 10px 10px;
+  padding: 10px;
+  text-align: center;
+}
+
+.lowerText p{
+  padding: 10;
+  margin: 10px;
+}
+.grid-12-col {
+  margin: 60px 30px 30px 60px;
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  grid-gap: 20px;
+}
+
+.six{
+  grid-column-end: span 2;
+  margin: auto;
+}
+
+.six img{
+  width: 100%;
+  max-width: 180px;
+}
+
+.one {
+  grid-column-end: span 12;
+  /* border: 1px black solid; */
+}
+
+.one img{
+  max-width:950%; 
+}
+
+.two{
+  height:300px;
+  width: 100%;
+  grid-column-end: span 6;
+  margin: auto;
+}
+
+.two img {
+  width: 100%;
+}
+.four{
+  height: 30px;
+  background-color: rgb(200,200, 200);
+  grid-column-end: span 3;
+}
+
+footer {
+  margin: 90px 30px;
+  display: grid;
+  grid-template-columns: 33% 1fr 1fr 1fr 1fr;
+  grid-gap: 20px;
+}
+
+@media only screen and (max-width: 1024px) {
+  .grid-12-col{
+    grid-template-columns: repeat(6, 1fr);
+  }
+
+  .one img{
+    margin: 10px;
+    width: 100vw;
+    display: block;
+  }
+
+  .six{
+    grid-column-end: span 3;
+  }
+  .topBar{
+    margin: 0px;
+    padding: 10px;
+    text-align: center;
+    height: auto;
+    position: fixed;
+    z-index:200;
+    width:100%;
+  }
+  .navigation{
+    float: none;
+  }
+  #siteNav ul{
+    margin: 15px 0 0 0;
+  }
+  #sitenav ul li a{
+    padding: 7px 10px;
+  }
+  #myInput{
+    height: 56px;
+    margin: 10px 10px 10px 10px;
+    padding: 0px;
+  }
+}
+
+@media only screen and (max-width: 480px) {
+  .grid-12-col{
+    grid-template-columns: 1fr;
+  }
+  .one img{
+    grid-column-end: 1 fr;
+  }
+  .six{
+    grid-column-end: 1 fr;
+  }
+  .four{
+    grid-column-end: 1 fr;
+  }
+  .two{
+    grid-column-end: 1 fr;
+  }
+  footer{
+    grid-column-end: 1 fr;
+  }
+
+  .topBar img{
+    display: none;
+  }
+  .buttonHolder{
+    height: 56px;
+    margin: 10px 10px 10px 10px;
+    padding: 0px;
+  }
+}
+
+h1{
+  padding: 8px;
+}
+
+#myInput{
+  float: left;
+  margin: 10px 10px 10px 10px;
+  height: 44px;
+  left: 0;
+  padding-left: 8px;
+  align-content: start;
+  border: 3px solid black;
+
+}
+
+#tbl {
+  width: 97vw;
+  height: 100%;
+  margin-left: 10px;
+  margin-right: 1vw;
+
+}
+
+table {
+  margin: 10px;
+  width: 100%;
+  background-color: #fff;
+}
+
+th {
+  height: 70px;
+  padding: 10px;
+  background-color: black;
+  color: white;
+}
+
+tr {
+  height: 35px;
+  padding: 5px;
+}
+
+table,
+th,
+td {
+  border: 1px solid black;
+  border-collapse: collapse;
+  padding: 5px;
+
+}
+
+caption {
+  float: left;
+  padding: 8px;
+  color: darkgray;
+  text-align: left;
+  letter-spacing: 1px;
+}

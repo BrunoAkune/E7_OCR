@@ -9,37 +9,37 @@ body {
   margin: 0;
 }
 
-#hero{
-	color: white;
-	padding: 35px 0 35px 0;
- 	background: #FF512F;  /* fallback for old browsers */
-	background: -webkit-linear-gradient(to right, #F09819, #FF512F);  /* Chrome 10-25, Safari 5.1-6 */
-	background: linear-gradient(to right, #F09819, #FF512F); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
- }
-
- #allNames {
-  display: none;
-}
-#errorMessage {
-  display: none;
-  color: red;
+#tbl {
+  width: 100%;
+  height: 100%;
+  margin: 0;
 }
 
-#loader {
-  border: 16px solid #f3f3f3; /* Light grey */
-  border-top: 16px solid #3498db; /* Blue */
-  border-radius: 50%;
-  width: 50px;
-  height: 50px;
-  animation: spin 2s linear infinite;
-  margin: auto;
-  margin-top: 40px;
+table {
+  margin: 10px;
+  width: 100%;
+  background-color: #cecece;
 }
 
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+th {
+  height: 70px;
+  padding: 10px;
 }
+
+tr {
+  height: 35px;
+  padding: 5px;
+}
+
+table,
+th,
+td {
+  border: 1px solid black;
+  border-collapse: collapse;
+  padding: 5px;
+
+}
+
 
 footer{
 	text-align: center;
