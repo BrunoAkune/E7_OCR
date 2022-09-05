@@ -19,13 +19,5 @@
   },
   "devDependencies": {
     "nodemon": "^2.0.19"
-  },
-    "version": 2,
-    "name": "E7_OCR",
-    "builds": [
-       { "src": "app.js", "use": "@vercel/node" }
-    ],
-    "routes": [
-       { "src": "/(.*)", "dest": "/app.js" }
-    ]
+  }
 }
